@@ -4,7 +4,7 @@ import Message from './Message'
 export default class MessageList extends React.Component { 
    
     render(){
-        console.log(this.props)
+        
         return (
                 <div className="message">
                     {this.props.data.map(message =>

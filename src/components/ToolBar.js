@@ -1,6 +1,7 @@
 import React from 'react'
-
 class Toolbar extends React.Component {
+
+
 
     render(){
       let className =''
@@ -14,8 +15,7 @@ class Toolbar extends React.Component {
         
         }       
       }
-      console.log(arr.length)
-      console.log(data.length)
+      
       if(arr.length === data.length){
         className += 'fa-check-square-o'
      } else if (arr.length < data.length && arr.length > 0){    
@@ -33,7 +33,9 @@ class Toolbar extends React.Component {
     <span className="badge badge">{this.props.unreadCount()}</span>
     unread messages
   </p>
-
+  <a className="btn btn-danger" onClick = {this.props.dropdownMessage}>
+      <i className="fa fa-plus"></i>
+    </a>
   <button className="btn btn-default" onClick = {this.props.selectAll}>
     <i className={`fa ${className} `}></i>
   </button>
@@ -60,7 +62,7 @@ class Toolbar extends React.Component {
     <option value="gschool">gschool</option>
   </select>
 
-  <button className="btn btn-default">
+  <button className="btn btn-default" onClick = {this.props.deleteMessage}>
     <i className="fa fa-trash-o"></i>
   </button>
 </div>

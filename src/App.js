@@ -70,16 +70,16 @@ class App extends Component {
     super()
     this.state = {
       data: data,
-      isRead: false,
+      
       
       
     }
-    console.log(this.state.isRead)
+   
   }
   
 
   selectedMessage = (i) => {
-    let read = this.state.isRead
+    
    let selectedthing = this.state.data
     if(selectedthing[i].selected === true){
       selectedthing[i].selected = false
@@ -113,19 +113,32 @@ class App extends Component {
   }
 
   markRead = () => {
-    let markedRead = this.state.data
-    if(this.props.isRead === true){
+    let markedRead = this.state.data    
       for(let i = 0; i < markedRead.length; i++){
-        markedRead[i].read = true
+        if(markedRead[i].selected === true){
+          markedRead[i].read = true
+          markedRead[i].selected = false
+          this.setState({data: markedRead})
+        }
       }
+  }
+
+  markUnread = () => {
+    let markedUnread = this.state.data
+    for(let i = 0; i < markedUnread.length; i++){
+      if(markedUnread[i].selected === true){
+        markedUnread[i].read = false
+        markedUnread[i].selected = false
+        this.setState({data: markedUnread})
+      } 
     }
   }
 
   render() {
     return (
       <div>
-        <ToolBar data={this.state.data} unreadCount = {this.unreadCount} markRead = {this.markRead}/>
-        <MessageList data={this.state.data} selectedMessage = {this.selectedMessage} starred = {this.starred} isRead={this.state.isRead}/>
+        <ToolBar data={this.state.data} unreadCount = {this.unreadCount} markRead = {this.markRead} markUnread = {this.markUnread}/>
+        <MessageList data={this.state.data} selectedMessage = {this.selectedMessage} starred = {this.starred} />
       </div>
     );
   }

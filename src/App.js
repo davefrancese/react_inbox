@@ -134,10 +134,56 @@ class App extends Component {
     }
   }
 
+
+  applyLabel = (e) => {
+    e.preventDefault()
+    let newlabel = this.state.data
+    for(let i = 0; i < newlabel.length; i++){
+      if(newlabel[i].selected === true){
+        newlabel[i].labels.push(e.target.value)
+        this.setState({data: newlabel})
+      }
+    }
+  }
+
+  removeLabel = (e) => {
+    e.preventDefault()
+    let el = e.target.value
+    let removeLabel = this.state.data
+    for(let i = 0; i < removeLabel.length; i++){
+      if(removeLabel[i].selected === true){
+        let labels = removeLabel[i].labels         
+        removeLabel[i].labels = labels.filter(move => move !== el)
+        this.setState({data: removeLabel})
+        
+      }
+    }
+  }
+
+  deleteMessage = (i) => {
+    let deleteMess = this.state.data 
+      if(deleteMess[i].selected === true){
+        deleteMess[i] = null
+        this.setState({data: deleteMess})
+      }
+  
+  }
+
+  selectAll = () => {
+    let select = this.state.data
+    for(let i = 0; i < select.length; i++){
+      console.log(select[i])
+      if(!select[i].selected){
+        select[i].selected = true
+        this.setState({data: select})
+      } 
+    }
+  }
+
   render() {
     return (
       <div>
-        <ToolBar data={this.state.data} unreadCount = {this.unreadCount} markRead = {this.markRead} markUnread = {this.markUnread}/>
+        <ToolBar data={this.state.data} unreadCount = {this.unreadCount} markRead = {this.markRead} markUnread = {this.markUnread} applyLabel = {this.applyLabel} removeLabel = {this.removeLabel} deleteMessage = {this.deleteMessage} selectAll = {this.selectAll}/>
         <MessageList data={this.state.data} selectedMessage = {this.selectedMessage} starred = {this.starred} />
       </div>
     );

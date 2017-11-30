@@ -2,79 +2,47 @@ import React, { Component } from 'react';
 import './App.css';
 import ToolBar from './components/ToolBar'
 import MessageList from './components/MessageList'
+import ComposeForm from './components/ComposeForm'
+import request from '../node_modules/superagent/superagent'
 
-const data = [
-  {
-    "id": 1,
-    "subject": "You can't input the protocol without calculating the mobile RSS protocol!",
-    "read": false,
-    "starred": true,
-    "labels": ["dev", "personal"]
-  },
-  {
-    "id": 2,
-    "subject": "connecting the system won't do anything, we need to input the mobile AI panel!",
-    "read": false,
-    "starred": false,
-    "selected": true,
-    "labels": []
-  },
-  {
-    "id": 3,
-    "subject": "Use the 1080p HTTP feed, then you can parse the cross-platform hard drive!",
-    "read": false,
-    "starred": true,
-    "labels": ["dev"]
-  },
-  {
-    "id": 4,
-    "subject": "We need to program the primary TCP hard drive!",
-    "read": true,
-    "starred": false,
-    "selected": true,
-    "labels": []
-  },
-  {
-    "id": 5,
-    "subject": "If we override the interface, we can get to the HTTP feed through the virtual EXE interface!",
-    "read": false,
-    "starred": false,
-    "labels": ["personal"]
-  },
-  {
-    "id": 6,
-    "subject": "We need to back up the wireless GB driver!",
-    "read": true,
-    "starred": true,
-    "labels": []
-  },
-  {
-    "id": 7,
-    "subject": "We need to index the mobile PCI bus!",
-    "read": true,
-    "starred": false,
-    "labels": ["dev", "personal"]
-  },
-  {
-    "id": 8,
-    "subject": "If we connect the sensor, we can get to the HDD port through the redundant IB firewall!",
-    "read": true,
-    "starred": true,
-    "labels": []
-  }
-]
 
 class App extends Component {
 
   constructor(){
     super()
     this.state = {
-      data: data,
-      
-      
-      
-    }
-   
+      data: [],
+      composeForm: false     
+    }   
+  }
+
+  async componentDidMount() {
+    const response = await fetch('https://brownemail.herokuapp.com/api/messages')
+    const json = await response.json()    
+    this.setState({data: json._embedded.messages})
+  }
+
+  async postRequest(compose) {
+     request
+    .post('https://brownemail.herokuapp.com/api/messages')
+    .set('Content-Type', 'application/x-www-form-urlencoded')
+    .send({ subject: compose.subject, body: compose.body })
+    .end(function(err, res){
+    console.log(res.text);
+    });
+    this.componentDidMount() 
+  }
+
+  async patchRequest(item, data){
+    fetch('https://brownemail.herokuapp.com/api/messages', {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      method: 'PATCH',                                                              
+      body: JSON.stringify(item)                                        
+    })
+    this.setState({data: data})
   }
   
 
@@ -99,6 +67,13 @@ class App extends Component {
       starredthing[i].starred = true
       this.setState({data: starredthing})
     }
+    let patch = {
+      "messageIds": [starredthing[i].id],
+      "command": "star",
+      "star": starredthing[i].starred
+    }
+    console.log(patch)
+    this.patchRequest(patch, starredthing)
   }
 
   unreadCount = () => {
@@ -113,66 +88,111 @@ class App extends Component {
   }
 
   markRead = () => {
-    let markedRead = this.state.data    
+    let markedRead = this.state.data
+    let patch = {
+      "messageIds":[],
+      "command": "read",
+      "read": false
+    }    
       for(let i = 0; i < markedRead.length; i++){
         if(markedRead[i].selected === true){
           markedRead[i].read = true
           markedRead[i].selected = false
+          patch.messageIds.push(markedRead[i].id)
+          patch.read = markedRead[i].read
           this.setState({data: markedRead})
         }
       }
+      console.log(patch)
+      this.patchRequest(patch,markedRead)
   }
 
   markUnread = () => {
     let markedUnread = this.state.data
+    let patch = {
+      "messageIds":[],
+      "command": "read",
+      "read": true
+    }    
     for(let i = 0; i < markedUnread.length; i++){
       if(markedUnread[i].selected === true){
         markedUnread[i].read = false
         markedUnread[i].selected = false
+        patch.messageIds.push(markedUnread[i].id)
+        patch.read = markedUnread[i].read
         this.setState({data: markedUnread})
       } 
     }
+    console.log(patch)
+    this.patchRequest(patch, markedUnread)
   }
 
 
   applyLabel = (e) => {
     e.preventDefault()
     let newlabel = this.state.data
+    let patch = {
+      "messageIds":[],
+      "command": "addLabel",
+      "label": ""
+    }    
     for(let i = 0; i < newlabel.length; i++){
       if(newlabel[i].selected === true){
         newlabel[i].labels.push(e.target.value)
+        patch.messageIds.push(newlabel[i].id)
+        patch.label = e.target.value
         this.setState({data: newlabel})
       }
     }
+    console.log(patch)
+    this.patchRequest(patch, newlabel)
   }
 
   removeLabel = (e) => {
     e.preventDefault()
     let el = e.target.value
     let removeLabel = this.state.data
+    let patch = {
+      "messageIds":[],
+      "command": "removeLabel",
+      "label": ""
+    }
     for(let i = 0; i < removeLabel.length; i++){
       if(removeLabel[i].selected === true){
         let labels = removeLabel[i].labels         
         removeLabel[i].labels = labels.filter(move => move !== el)
-        this.setState({data: removeLabel})
-        
+        patch.messageIds.push(removeLabel[i].id)
+        patch.label = e.target.value
+        this.setState({data: removeLabel})        
       }
     }
+    console.log(patch)
+    this.patchRequest(patch, removeLabel)
   }
 
-  deleteMessage = (i) => {
-    let deleteMess = this.state.data 
-      if(deleteMess[i].selected === true){
-        deleteMess[i] = null
-        this.setState({data: deleteMess})
+  deleteMessage = () => {
+    let deleteMess = this.state.data
+    let arr = []
+    let patch = {
+      "messageIds":[],
+      "command": "delete",
+    }
+    for (let i = 0; i < deleteMess.length; i++) {
+      if (deleteMess[i].selected !== true) {
+        arr.push(deleteMess[i])
+        this.setState({data: arr})
+      } else {
+        patch.messageIds.push(deleteMess[i].id)
       }
-  
+    }
+    console.log(patch)
+    this.patchRequest(patch, arr)    
   }
 
   selectAll = () => {
     let select = this.state.data
     for(let i = 0; i < select.length; i++){
-      console.log(select[i])
+      
       if(!select[i].selected){
         select[i].selected = true
         this.setState({data: select})
@@ -180,10 +200,31 @@ class App extends Component {
     }
   }
 
+  dropdownMessage = () => {
+   this.setState({composeForm: !this.state.composeForm})
+    
+    }
+
+  createMessage = (e) => {
+    e.preventDefault()
+    let compose = {
+      subject: e.target.subject.value,
+      body: e.target.body.value
+    }
+    this.postRequest(compose)
+    this.dropdownMessage() 
+  }
+
   render() {
     return (
+      
       <div>
-        <ToolBar data={this.state.data} unreadCount = {this.unreadCount} markRead = {this.markRead} markUnread = {this.markUnread} applyLabel = {this.applyLabel} removeLabel = {this.removeLabel} deleteMessage = {this.deleteMessage} selectAll = {this.selectAll}/>
+          
+        <ToolBar data={this.state.data} unreadCount = {this.unreadCount} markRead = {this.markRead} markUnread = {this.markUnread} applyLabel = {this.applyLabel} removeLabel = {this.removeLabel} deleteMessage = {this.deleteMessage} selectAll = {this.selectAll} dropdownMessage = {this.dropdownMessage}/>
+        {
+            this.state.composeForm
+            ? <ComposeForm createMessage = {this.createMessage}/> : null
+          }
         <MessageList data={this.state.data} selectedMessage = {this.selectedMessage} starred = {this.starred} />
       </div>
     );

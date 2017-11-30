@@ -24,7 +24,7 @@ class Message extends React.Component {
                     </div>
                 </div>
                 <div className="col-xs-11">
-                    {this.props.message.labels.map(label => <span className="label label-warning">{label}
+                    {this.props.message.labels.map((label,i) => <span className="label label-warning" key={i}>{label}
       </span>)}
                     <a>
                         {this.props.message.subject}

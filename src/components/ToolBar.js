@@ -17,11 +17,11 @@ class Toolbar extends React.Component {
     <i className="fa fa-minus-square-o"></i>
   </button>
 
-  <button className="btn btn-default" onClick ={this.props.markRead()}>
+  <button className="btn btn-default" onClick = {this.props.markRead}>
     Mark As Read
   </button>
 
-  <button className="btn btn-default">
+  <button className="btn btn-default" onClick ={this.props.markUnread}>
     Mark As Unread
   </button>
 
